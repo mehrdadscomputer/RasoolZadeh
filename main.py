@@ -19,6 +19,9 @@ from PyQt5.QtWidgets import *
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
+from matplotlib import style
+
+from PyQt5 import QtGui
 
 
 class AppForm(QMainWindow):
@@ -103,7 +106,6 @@ class AppForm(QMainWindow):
         # work.
         #
         self.axes = self.fig.add_subplot(111)
-
 
         # Create the navigation toolbar, tied to the canvas
         #
