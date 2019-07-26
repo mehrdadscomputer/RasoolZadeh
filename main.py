@@ -12,6 +12,10 @@ applications featuring mpl plots (using the mpl OO API).
 """
 
 import sys
+import os
+import csv
+import numpy as np
+
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
@@ -26,7 +30,11 @@ class AppForm(QMainWindow):
         QMainWindow.__init__(self, parent)
         self.setWindowTitle('Demo: PyQt with matplotlib')
 
-        self.data = []
+        self.data = np.zeros((3, 10))
+
+        self.open_csv_file()
+
+        #self.readDataFromFile()
 
         self.create_menu()
         self.create_main_frame()
@@ -34,6 +42,16 @@ class AppForm(QMainWindow):
 
         self.textbox.setText('1 2 3 4')
         self.on_draw()
+
+    def open_csv_file(self):
+        path = QFileDialog.getOpenFileName(self, 'Open CSV', os.getenv('HOME'), 'CSV(*.csv)')
+        if path[0] != '':
+            with open(path[0], newline='') as csv_file:
+                my_file = csv.reader(csv_file, delimiter = ',', quotechar='|')
+                for i, row_data in enumerate(my_file):
+                    for j, stuff in enumerate(row_data):
+                        self.data[i][j]= int(stuff)
+                        # print(column, stuff, type(stuff))
 
     def save_plot(self):
         file_choices = "PNG (*.png)|*.png"
@@ -65,21 +83,24 @@ class AppForm(QMainWindow):
         """ Redraws the figure
         """
         str = self.textbox.text().encode('utf-8')
-        self.data = [int(s) for s in str.split()]
+        # self.data = [int(s) for s in str.split()]
 
-        x = range(len(self.data))
+        # x = range(len(self.data))
+        x = self.data[0]
+        y = self.data[1]
+        z = self.data[2]
 
         # clear the axes and redraw the plot anew
         #
         self.axes.clear()
         self.axes.grid(self.grid_cb.isChecked())
 
-        self.axes.plot(x, self.data, 'go-',
+        self.axes.plot(x, y, 'go-',
                        label='line 1',
                        linewidth=self.slider.value() / 100.0,
                        picker=5)
 
-        self.axes.plot(x, x, 'rs-',
+        self.axes.plot(x, z, 'rs-',
                        label='line 2',
                        linewidth=self.slider.value() / 100.0,
                        picker=5)
@@ -104,7 +125,6 @@ class AppForm(QMainWindow):
         #
         self.axes = self.fig.add_subplot(111)
 
-
         # Create the navigation toolbar, tied to the canvas
         #
         self.mpl_toolbar = NavigationToolbar(self.canvas, self.main_frame)
@@ -117,6 +137,8 @@ class AppForm(QMainWindow):
 
         self.draw_button = QPushButton("&Draw")
         self.draw_button.clicked.connect(self.on_draw)
+
+
 
         self.grid_cb = QCheckBox("Show &Grid")
         self.grid_cb.setChecked(False)
