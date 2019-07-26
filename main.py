@@ -31,10 +31,12 @@ class AppForm(QMainWindow):
         self.setWindowTitle('Demo: PyQt with matplotlib')
 
         self.data = np.zeros((3, 10))
+        self.color1 = 'green'
+        self.color2 = 'red'
 
         self.open_csv_file()
 
-        #self.readDataFromFile()
+        # self.readDataFromFile()
 
         self.create_menu()
         self.create_main_frame()
@@ -47,10 +49,10 @@ class AppForm(QMainWindow):
         path = QFileDialog.getOpenFileName(self, 'Open CSV', os.getenv('HOME'), 'CSV(*.csv)')
         if path[0] != '':
             with open(path[0], newline='') as csv_file:
-                my_file = csv.reader(csv_file, delimiter = ',', quotechar='|')
+                my_file = csv.reader(csv_file, delimiter=',', quotechar='|')
                 for i, row_data in enumerate(my_file):
                     for j, stuff in enumerate(row_data):
-                        self.data[i][j]= int(stuff)
+                        self.data[i][j] = int(stuff)
                         # print(column, stuff, type(stuff))
 
     def save_plot(self):
@@ -95,17 +97,27 @@ class AppForm(QMainWindow):
         self.axes.clear()
         self.axes.grid(self.grid_cb.isChecked())
 
-        self.axes.plot(x, y, 'go-',
+        self.axes.plot(x, y, color=self.color1, marker='o', linestyle='dashed',
                        label='line 1',
                        linewidth=self.slider.value() / 100.0,
                        picker=5)
 
-        self.axes.plot(x, z, 'rs-',
+        self.axes.plot(x, z, color=self.color2, marker='s',
                        label='line 2',
                        linewidth=self.slider.value() / 100.0,
                        picker=5)
 
         self.canvas.draw()
+
+    def on_color_picker(self, name):
+        color = QColorDialog.getColor()
+        if color.isValid():
+            # print(color.name())
+            if (name == 'button1'):
+                self.color1 = color.name()
+            else:
+                self.color2 = color.name()
+            self.on_draw()
 
     def create_main_frame(self):
         self.main_frame = QWidget()
@@ -138,7 +150,13 @@ class AppForm(QMainWindow):
         self.draw_button = QPushButton("&Draw")
         self.draw_button.clicked.connect(self.on_draw)
 
+        self.color_picker_button1 = QPushButton("Color Picker #1")
+        self.color_picker_button1.setToolTip('Opens color dialog')
+        self.color_picker_button1.clicked.connect(lambda: self.on_color_picker('button1'))
 
+        self.color_picker_button2 = QPushButton("Color Picker #2")
+        self.color_picker_button2.setToolTip('Opens color dialog')
+        self.color_picker_button2.clicked.connect(lambda: self.on_color_picker('button2'))
 
         self.grid_cb = QCheckBox("Show &Grid")
         self.grid_cb.setChecked(False)
@@ -157,7 +175,7 @@ class AppForm(QMainWindow):
         #
         hbox = QHBoxLayout()
 
-        for w in [self.textbox, self.draw_button, self.grid_cb,
+        for w in [self.textbox, self.draw_button, self.color_picker_button1, self.color_picker_button2, self.grid_cb,
                   slider_label, self.slider]:
             hbox.addWidget(w)
             hbox.setAlignment(w, Qt.AlignVCenter)
